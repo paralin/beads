@@ -175,113 +175,25 @@ The hooks ensure that:
 
 var hooksInstallCmd = &cobra.Command{
 	Use:   "install",
-	Short: "Install bd git hooks",
-	Long: `Install git hooks for automatic bd sync.
+	Short: "Install bd git hooks (DISABLED)",
+	Long: `DISABLED: Git hooks installation has been disabled in this build.
 
-By default, hooks are installed to .git/hooks/ in the current repository.
-Use --shared to install to a versioned directory (.beads-hooks/) that can be
-committed to git and shared with team members.
-
-Use --chain to preserve existing hooks and run them before bd hooks. This is
-useful if you have pre-commit framework hooks or other custom hooks.
-
-Installed hooks:
-  - pre-commit: Flush changes to JSONL before commit
-  - post-merge: Import JSONL after pull/merge
-  - pre-push: Prevent pushing stale JSONL
-  - post-checkout: Import JSONL after branch checkout
-  - prepare-commit-msg: Add agent identity trailers (for orchestrator agents)`,
+This feature was removed to minimize beads' footprint. The CLI and database
+functionality remain fully operational without git hooks.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		force, _ := cmd.Flags().GetBool("force")
-		shared, _ := cmd.Flags().GetBool("shared")
-		chain, _ := cmd.Flags().GetBool("chain")
-
-		embeddedHooks, err := getEmbeddedHooks()
-		if err != nil {
-			if jsonOutput {
-				output := map[string]interface{}{
-					"error": err.Error(),
-				}
-				jsonBytes, _ := json.MarshalIndent(output, "", "  ")
-				fmt.Println(string(jsonBytes))
-			} else {
-				fmt.Fprintf(os.Stderr, "Error loading hooks: %v\n", err)
-			}
-			os.Exit(1)
-		}
-
-		if err := installHooks(embeddedHooks, force, shared, chain); err != nil {
-			if jsonOutput {
-				output := map[string]interface{}{
-					"error": err.Error(),
-				}
-				jsonBytes, _ := json.MarshalIndent(output, "", "  ")
-				fmt.Println(string(jsonBytes))
-			} else {
-				fmt.Fprintf(os.Stderr, "Error installing hooks: %v\n", err)
-			}
-			os.Exit(1)
-		}
-
-		if jsonOutput {
-			output := map[string]interface{}{
-				"success": true,
-				"message": "Git hooks installed successfully",
-				"shared":  shared,
-				"chained": chain,
-			}
-			jsonBytes, _ := json.MarshalIndent(output, "", "  ")
-			fmt.Println(string(jsonBytes))
-		} else {
-			fmt.Println("✓ Git hooks installed successfully")
-			fmt.Println()
-			if chain {
-				fmt.Println("Mode: chained (existing hooks renamed to .old and will run first)")
-				fmt.Println()
-			}
-			if shared {
-				fmt.Println("Hooks installed to: .beads-hooks/")
-				fmt.Println("Git config set: core.hooksPath=.beads-hooks")
-				fmt.Println()
-				fmt.Println("⚠️  Remember to commit .beads-hooks/ to share with your team!")
-				fmt.Println()
-			}
-			fmt.Println("Installed hooks:")
-			for hookName := range embeddedHooks {
-				fmt.Printf("  - %s\n", hookName)
-			}
-		}
+		// DISABLED: Git hooks installation - too invasive for minimal setup
+		fmt.Println("Git hooks installation is disabled in this build.")
+		fmt.Println("Use bd sync manually to synchronize changes.")
 	},
 }
 
 var hooksUninstallCmd = &cobra.Command{
 	Use:   "uninstall",
-	Short: "Uninstall bd git hooks",
-	Long:  `Remove bd git hooks from .git/hooks/ directory.`,
+	Short: "Uninstall bd git hooks (DISABLED)",
+	Long:  `DISABLED: Git hooks management has been disabled in this build.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := uninstallHooks(); err != nil {
-			if jsonOutput {
-				output := map[string]interface{}{
-					"error": err.Error(),
-				}
-				jsonBytes, _ := json.MarshalIndent(output, "", "  ")
-				fmt.Println(string(jsonBytes))
-			} else {
-				fmt.Fprintf(os.Stderr, "Error uninstalling hooks: %v\n", err)
-			}
-			os.Exit(1)
-		}
-
-		if jsonOutput {
-			output := map[string]interface{}{
-				"success": true,
-				"message": "Git hooks uninstalled successfully",
-			}
-			jsonBytes, _ := json.MarshalIndent(output, "", "  ")
-			fmt.Println(string(jsonBytes))
-		} else {
-			fmt.Println("✓ Git hooks uninstalled successfully")
-		}
+		// DISABLED: Git hooks uninstallation - feature disabled
+		fmt.Println("Git hooks management is disabled in this build.")
 	},
 }
 

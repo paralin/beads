@@ -17,64 +17,13 @@ import (
 )
 
 // CheckGitHooks verifies that recommended git hooks are installed.
+// DISABLED: Git hooks are disabled in this build, so this check always returns OK.
 func CheckGitHooks() DoctorCheck {
-	// Check if we're in a git repository using worktree-aware detection
-	gitDir, err := git.GetGitDir()
-	if err != nil {
-		return DoctorCheck{
-			Name:    "Git Hooks",
-			Status:  StatusOK,
-			Message: "N/A (not a git repository)",
-		}
-	}
-
-	// Recommended hooks and their purposes
-	recommendedHooks := map[string]string{
-		"pre-commit": "Flushes pending bd changes to JSONL before commit",
-		"post-merge": "Imports updated JSONL after git pull/merge",
-		"pre-push":   "Exports database to JSONL before push",
-	}
-
-	hooksDir := filepath.Join(gitDir, "hooks")
-	var missingHooks []string
-	var installedHooks []string
-
-	for hookName := range recommendedHooks {
-		hookPath := filepath.Join(hooksDir, hookName)
-		if _, err := os.Stat(hookPath); os.IsNotExist(err) {
-			missingHooks = append(missingHooks, hookName)
-		} else {
-			installedHooks = append(installedHooks, hookName)
-		}
-	}
-
-	if len(missingHooks) == 0 {
-		return DoctorCheck{
-			Name:    "Git Hooks",
-			Status:  StatusOK,
-			Message: "All recommended hooks installed",
-			Detail:  fmt.Sprintf("Installed: %s", strings.Join(installedHooks, ", ")),
-		}
-	}
-
-	hookInstallMsg := "Install hooks with 'bd hooks install'. See https://github.com/steveyegge/beads/tree/main/examples/git-hooks for installation instructions"
-
-	if len(installedHooks) > 0 {
-		return DoctorCheck{
-			Name:    "Git Hooks",
-			Status:  StatusWarning,
-			Message: fmt.Sprintf("Missing %d recommended hook(s)", len(missingHooks)),
-			Detail:  fmt.Sprintf("Missing: %s", strings.Join(missingHooks, ", ")),
-			Fix:     hookInstallMsg,
-		}
-	}
-
+	// DISABLED: Git hooks installation - too invasive for minimal setup
 	return DoctorCheck{
 		Name:    "Git Hooks",
-		Status:  StatusWarning,
-		Message: "No recommended git hooks installed",
-		Detail:  fmt.Sprintf("Recommended: %s", strings.Join([]string{"pre-commit", "post-merge", "pre-push"}, ", ")),
-		Fix:     hookInstallMsg,
+		Status:  StatusOK,
+		Message: "N/A (git hooks disabled in this build)",
 	}
 }
 
@@ -346,61 +295,14 @@ func CheckSyncBranchHookCompatibility(path string) DoctorCheck {
 }
 
 // CheckMergeDriver verifies that the git merge driver is correctly configured.
+// DISABLED: Git merge driver is disabled in this build, so this check always returns OK.
 func CheckMergeDriver(path string) DoctorCheck {
-	// Check if we're in a git repository using worktree-aware detection
-	_, err := git.GetGitDir()
-	if err != nil {
-		return DoctorCheck{
-			Name:    "Git Merge Driver",
-			Status:  StatusOK,
-			Message: "N/A (not a git repository)",
-		}
-	}
-
-	// Get current merge driver configuration
-	cmd := exec.Command("git", "config", "merge.beads.driver")
-	cmd.Dir = path
-	output, err := cmd.Output()
-	if err != nil {
-		// Merge driver not configured
-		return DoctorCheck{
-			Name:    "Git Merge Driver",
-			Status:  StatusWarning,
-			Message: "Git merge driver not configured",
-			Fix:     "Run 'bd init' to configure the merge driver, or manually: git config merge.beads.driver \"bd merge %A %O %A %B\"",
-		}
-	}
-
-	currentConfig := strings.TrimSpace(string(output))
-	correctConfig := "bd merge %A %O %A %B"
-
-	// Check if using old incorrect placeholders
-	if strings.Contains(currentConfig, "%L") || strings.Contains(currentConfig, "%R") {
-		return DoctorCheck{
-			Name:    "Git Merge Driver",
-			Status:  StatusError,
-			Message: fmt.Sprintf("Incorrect merge driver config: %q (uses invalid %%L/%%R placeholders)", currentConfig),
-			Detail:  "Git only supports %O (base), %A (current), %B (other). Using %L/%R causes merge failures.",
-			Fix:     "Run 'bd doctor --fix' to update to correct config, or manually: git config merge.beads.driver \"bd merge %A %O %A %B\"",
-		}
-	}
-
-	// Check if config is correct
-	if currentConfig != correctConfig {
-		return DoctorCheck{
-			Name:    "Git Merge Driver",
-			Status:  StatusWarning,
-			Message: fmt.Sprintf("Non-standard merge driver config: %q", currentConfig),
-			Detail:  fmt.Sprintf("Expected: %q", correctConfig),
-			Fix:     fmt.Sprintf("Run 'bd doctor --fix' to update config, or manually: git config merge.beads.driver \"%s\"", correctConfig),
-		}
-	}
-
+	// DISABLED: Git merge driver installation - too invasive for minimal setup
+	_ = path // silence unused variable warning
 	return DoctorCheck{
 		Name:    "Git Merge Driver",
 		Status:  StatusOK,
-		Message: "Correctly configured",
-		Detail:  currentConfig,
+		Message: "N/A (merge driver disabled in this build)",
 	}
 }
 

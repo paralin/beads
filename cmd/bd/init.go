@@ -66,18 +66,19 @@ With --stealth: configures per-repository git settings for invisible beads usage
 			}
 		}
 
+		// DISABLED: Stealth mode setup - too invasive for minimal setup
 		// Handle stealth mode setup
-		if stealth {
-			if err := setupStealthMode(!quiet); err != nil {
-				fmt.Fprintf(os.Stderr, "Error setting up stealth mode: %v\n", err)
-				os.Exit(1)
-			}
-
-			// In stealth mode, skip git hooks and merge driver installation
-			// since we handle it globally
-			skipHooks = true
-			skipMergeDriver = true
-		}
+		// if stealth {
+		// 	if err := setupStealthMode(!quiet); err != nil {
+		// 		fmt.Fprintf(os.Stderr, "Error setting up stealth mode: %v\n", err)
+		// 		os.Exit(1)
+		// 	}
+		//
+		// 	// In stealth mode, skip git hooks and merge driver installation
+		// 	// since we handle it globally
+		// 	skipHooks = true
+		// 	skipMergeDriver = true
+		// }
 
 		// Check BEADS_DB environment variable if --db flag not set
 		// (PersistentPreRun doesn't run for init command)
@@ -446,47 +447,52 @@ With --stealth: configures per-repository git settings for invisible beads usage
 			fmt.Fprintf(os.Stderr, "Warning: failed to close database: %v\n", err)
 		}
 
+		// DISABLED: Fork detection and .git/info/exclude setup - too invasive for minimal setup
 		// Fork detection: offer to configure .git/info/exclude (GH#742)
-		setupExclude, _ := cmd.Flags().GetBool("setup-exclude")
-		if setupExclude {
-			// Manual flag - always configure
-			if err := setupForkExclude(!quiet); err != nil {
-				fmt.Fprintf(os.Stderr, "Warning: failed to configure git exclude: %v\n", err)
-			}
-		} else if !stealth && isGitRepo() {
-			// Auto-detect fork and prompt (skip if stealth - it handles exclude already)
-			if isFork, upstreamURL := detectForkSetup(); isFork {
-				if promptForkExclude(upstreamURL, quiet) {
-					if err := setupForkExclude(!quiet); err != nil {
-						fmt.Fprintf(os.Stderr, "Warning: failed to configure git exclude: %v\n", err)
-					}
-				}
-			}
-		}
+		// setupExclude, _ := cmd.Flags().GetBool("setup-exclude")
+		// if setupExclude {
+		// 	// Manual flag - always configure
+		// 	if err := setupForkExclude(!quiet); err != nil {
+		// 		fmt.Fprintf(os.Stderr, "Warning: failed to configure git exclude: %v\n", err)
+		// 	}
+		// } else if !stealth && isGitRepo() {
+		// 	// Auto-detect fork and prompt (skip if stealth - it handles exclude already)
+		// 	if isFork, upstreamURL := detectForkSetup(); isFork {
+		// 		if promptForkExclude(upstreamURL, quiet) {
+		// 			if err := setupForkExclude(!quiet); err != nil {
+		// 				fmt.Fprintf(os.Stderr, "Warning: failed to configure git exclude: %v\n", err)
+		// 			}
+		// 		}
+		// 	}
+		// }
 
-		// Check if we're in a git repo and hooks aren't installed
+		// DISABLED: Git hooks installation - too invasive for minimal setup
 		// Install by default unless --skip-hooks is passed
-		if !skipHooks && isGitRepo() && !hooksInstalled() {
-			if err := installGitHooks(); err != nil && !quiet {
-				fmt.Fprintf(os.Stderr, "\n%s Failed to install git hooks: %v\n", ui.RenderWarn("⚠"), err)
-				fmt.Fprintf(os.Stderr, "You can try again with: %s\n\n", ui.RenderAccent("bd doctor --fix"))
-			}
-		}
+		_ = skipHooks // silence unused variable warning
+		// if !skipHooks && isGitRepo() && !hooksInstalled() {
+		// 	if err := installGitHooks(); err != nil && !quiet {
+		// 		fmt.Fprintf(os.Stderr, "\n%s Failed to install git hooks: %v\n", ui.RenderWarn("⚠"), err)
+		// 		fmt.Fprintf(os.Stderr, "You can try again with: %s\n\n", ui.RenderAccent("bd doctor --fix"))
+		// 	}
+		// }
 
-		// Check if we're in a git repo and merge driver isn't configured
+		// DISABLED: Merge driver installation - too invasive for minimal setup
 		// Install by default unless --skip-merge-driver is passed
-		if !skipMergeDriver && isGitRepo() && !mergeDriverInstalled() {
-			if err := installMergeDriver(); err != nil && !quiet {
-				fmt.Fprintf(os.Stderr, "\n%s Failed to install merge driver: %v\n", ui.RenderWarn("⚠"), err)
-				fmt.Fprintf(os.Stderr, "You can try again with: %s\n\n", ui.RenderAccent("bd doctor --fix"))
-			}
-		}
+		_ = skipMergeDriver // silence unused variable warning
+		// if !skipMergeDriver && isGitRepo() && !mergeDriverInstalled() {
+		// 	if err := installMergeDriver(); err != nil && !quiet {
+		// 		fmt.Fprintf(os.Stderr, "\n%s Failed to install merge driver: %v\n", ui.RenderWarn("⚠"), err)
+		// 		fmt.Fprintf(os.Stderr, "You can try again with: %s\n\n", ui.RenderAccent("bd doctor --fix"))
+		// 	}
+		// }
 
+		// DISABLED: AGENTS.md creation - too invasive for minimal setup
 		// Add "landing the plane" instructions to AGENTS.md and @AGENTS.md
 		// Skip in stealth mode (user wants invisible setup) and quiet mode (suppress all output)
-		if !stealth {
-			addLandingThePlaneInstructions(!quiet)
-		}
+		_ = stealth // silence unused variable warning
+		// if !stealth {
+		// 	addLandingThePlaneInstructions(!quiet)
+		// }
 
 		// Skip output if quiet mode
 		if quiet {
@@ -597,7 +603,6 @@ func migrateOldDatabases(targetPath string, quiet bool) error {
 	return nil
 }
 
-
 // readFirstIssueFromJSONL reads the first issue from a JSONL file
 func readFirstIssueFromJSONL(path string) (*types.Issue, error) {
 	// #nosec G304 -- helper reads JSONL file chosen by current bd command
@@ -664,7 +669,6 @@ func readFirstIssueFromGit(jsonlPath, gitRef string) (*types.Issue, error) {
 
 	return nil, nil
 }
-
 
 // checkExistingBeadsData checks for existing database files
 // and returns an error if found (safety guard for bd-emg)
